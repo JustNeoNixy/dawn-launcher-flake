@@ -1,0 +1,32 @@
+name: Update dawn-launcher source
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: cachix/install-nix-action@v27
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      - name: Run update script
+        run: bash scripts/update.sh
+
+      - name: Open PR if sources.json changed
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "dawn-launcher: bump to latest version"
+          title: "Update dawn-launcher"
+          branch: update-dawn-launcher
+          add-paths: sources.json
