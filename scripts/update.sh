@@ -19,10 +19,11 @@ fi
 echo "Latest version: $version" >&2
 
 echo "Downloading + hashing the tarball (this fetches the full file)..." >&2
+tarball_name="dawn-launcher-${version}-linux-amd64.tar.gz"
 if nix store prefetch-file --help >/dev/null 2>&1; then
-  hash=$(nix store prefetch-file --json --hash-type sha256 "$API_URL" | jq -r '.hash')
+  hash=$(nix store prefetch-file --json --hash-type sha256 --name "$tarball_name" "$API_URL" | jq -r '.hash')
 else
-  base32_hash=$(nix-prefetch-url "$API_URL")
+  base32_hash=$(nix-prefetch-url --name "$tarball_name" "$API_URL")
   hash=$(nix hash to-sri --type sha256 "$base32_hash")
 fi
 
