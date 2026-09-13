@@ -1,6 +1,6 @@
 # dawn-launcher-flake
 
-Nix flake for the Dawn Minecraft launcher (Linux tarball build).
+Nix flake for the Dawn Minecraft launcher.
 
 Unofficial. Not affiliated with InPvP or Dawn.
 
@@ -13,50 +13,36 @@ nix build .#default
 ./result/bin/dawn-launcher
 ```
 
-Or add it to your NixOS flake.
-
-In your system `flake.nix`:
+Or add it to your system flake. Add this block under `inputs`:
 
 ```nix
-{
-  inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    dawn-launcher = {
-      url = "github:JustNeoNixy/dawn-launcher-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-  };
-
-  outputs = { self, nixpkgs, dawn-launcher, ... }@inputs: {
-    nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
-      specialArgs = { inherit inputs; };
-      modules = [ ./configuration.nix ];
-    };
-  };
-}
+dawn-launcher = {
+  url = "github:<your-github-username>/dawn-launcher-flake";
+  inputs.nixpkgs.follows = "nixpkgs";
+};
 ```
 
-Then in `configuration.nix`:
+Then reference `inputs.dawn-launcher.packages.${system}.default` wherever you build your package set, for example:
 
 ```nix
-{ config, pkgs, inputs, ... }:
-
-{
-  environment.systemPackages = [
-    inputs.dawn-launcher.packages.${pkgs.system}.default
-  ];
-}
+packages = builtins.mapAttrs (system: pkgs: {
+  dawn-launcher = inputs.dawn-launcher.packages.${system}.default;
+  # ...your other packages
+}) inputs.nixpkgs.legacyPackages;
 ```
 
-If you'd rather use the overlay so it shows up as `pkgs.dawn-launcher`, add this to your system flake instead:
+Or, inside a NixOS module (your `nixosSystem` call needs `specialArgs = { inherit inputs; };` for `inputs` to be available in `configuration.nix`):
+
+```nix
+environment.systemPackages = [
+  inputs.dawn-launcher.packages.${pkgs.system}.default
+];
+```
+
+If you'd rather use the overlay so it shows up as `pkgs.dawn-launcher`, add this instead:
 
 ```nix
 nixpkgs.overlays = [ dawn-launcher.overlays.default ];
 ```
 
-and in `configuration.nix`:
-
-```nix
-environment.systemPackages = [ pkgs.dawn-launcher ];
-```
+and reference it as `pkgs.dawn-launcher`.
