@@ -3,6 +3,8 @@
 , fetchurl
 , autoPatchelfHook
 , makeWrapper
+, copyDesktopItems
+, makeDesktopItem
 , alsa-lib
 , at-spi2-atk
 , at-spi2-core
@@ -48,7 +50,18 @@ stdenv.mkDerivation (finalAttrs: {
     name = "dawn-launcher-${sources.version}-linux-amd64.tar.gz";
   };
 
-  nativeBuildInputs = [ autoPatchelfHook makeWrapper ];
+  nativeBuildInputs = [ autoPatchelfHook makeWrapper copyDesktopItems ];
+
+  desktopItems = [
+    (makeDesktopItem {
+      name = "dawn-launcher";
+      exec = "dawn-launcher";
+      icon = "dawn-launcher";
+      desktopName = "Dawn";
+      comment = "Minecraft launcher and client";
+      categories = [ "Game" ];
+    })
+  ];
 
   buildInputs = [
     stdenv.cc.cc.lib
@@ -109,6 +122,14 @@ stdenv.mkDerivation (finalAttrs: {
 
     makeWrapper "$launcher_bin" "$out/bin/dawn-launcher" \
       --chdir "$out/opt/dawn-launcher"
+
+    icon_src=$(find "$out/opt/dawn-launcher" -iname '*.png' | head -n1)
+    if [ -n "$icon_src" ]; then
+      install -Dm444 "$icon_src" "$out/share/pixmaps/dawn-launcher.png"
+      install -Dm444 "$icon_src" "$out/share/icons/hicolor/512x512/apps/dawn-launcher.png"
+    else
+      echo "installPhase: no icon found under $out/opt/dawn-launcher -- app menu entry will use a generic icon." >&2
+    fi
 
     runHook postInstall
   '';
