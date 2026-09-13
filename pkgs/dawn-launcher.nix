@@ -6,15 +6,14 @@
 , alsa-lib
 , at-spi2-atk
 , at-spi2-core
+, atk
 , cairo
 , cups
 , dbus
 , expat
 , fontconfig
 , freetype
-, gtk3
-, libGL
-, libdrm
+, glib
 , libglvnd
 , libxkbcommon
 , mesa
@@ -35,11 +34,6 @@ stdenv.mkDerivation (finalAttrs: {
   version = sources.version;
 
   src = fetchurl {
-    # Stable, first-party dawn.gg endpoint. It 302-redirects to a
-    # short-lived, pre-signed Cloudflare R2 URL; curl (used internally by
-    # fetchurl) follows that redirect on its own. The pinned hash below,
-    # not the URL, is what makes this reproducible -- the signed URL
-    # itself is never stored anywhere and is re-resolved on every build.
     url = "https://dawn.gg/api/launcher/download?platform=linux-amd64&format=tarball";
     hash = sources.hash;
     name = "dawn-launcher-${sources.version}-linux-amd64.tar.gz";
@@ -47,12 +41,10 @@ stdenv.mkDerivation (finalAttrs: {
 
   nativeBuildInputs = [ autoPatchelfHook makeWrapper ];
 
-  # Best-guess runtime deps for a Kotlin Compose Multiplatform desktop
-  # app shipping a bundled JRE + Skia renderer. This list is a starting
-  # point, not verified against the actual binary -- see the README
-  # note below on iterating on it.
   buildInputs = [
+    stdenv.cc.cc.lib
     alsa-lib
+    atk
     at-spi2-atk
     at-spi2-core
     cairo
@@ -61,9 +53,7 @@ stdenv.mkDerivation (finalAttrs: {
     expat
     fontconfig
     freetype
-    gtk3
-    libGL
-    libdrm
+    glib
     libglvnd
     libxkbcommon
     mesa
@@ -72,6 +62,7 @@ stdenv.mkDerivation (finalAttrs: {
     pango
     systemd
     wayland
+    zlib
     xorg.libX11
     xorg.libXcomposite
     xorg.libXdamage
@@ -82,7 +73,6 @@ stdenv.mkDerivation (finalAttrs: {
     xorg.libXrender
     xorg.libXtst
     xorg.libxcb
-    zlib
   ];
 
   sourceRoot = ".";
@@ -92,8 +82,6 @@ stdenv.mkDerivation (finalAttrs: {
 
     mkdir -p "$out/opt/dawn-launcher" "$out/bin"
 
-    # jpackage-style app-image layout: bin/, lib/, and a bundled
-    # runtime/ sit inside one top-level directory in the tarball.
     shopt -s dotglob nullglob
     entries=(*/)
     if [ "''${#entries[@]}" -eq 1 ]; then
