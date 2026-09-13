@@ -35,7 +35,7 @@ Or, inside a NixOS module (your `nixosSystem` call needs `specialArgs = { inheri
 
 ```nix
 environment.systemPackages = [
-  inputs.dawn-launcher.packages.${pkgs.system}.default
+  inputs.dawn-launcher.packages.${pkgs.stdenv.hostPlatform.system}.default
 ];
 ```
 
