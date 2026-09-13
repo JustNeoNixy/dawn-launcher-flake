@@ -15,14 +15,23 @@
 , freetype
 , glib
 , libglvnd
+, libx11
+, libxcb
+, libxcomposite
+, libxdamage
+, libxext
+, libxfixes
+, libxi
 , libxkbcommon
+, libxrandr
+, libxrender
+, libxtst
 , mesa
 , nspr
 , nss
 , pango
 , systemd
 , wayland
-, xorg
 , zlib
 }:
 
@@ -63,16 +72,16 @@ stdenv.mkDerivation (finalAttrs: {
     systemd
     wayland
     zlib
-    xorg.libX11
-    xorg.libXcomposite
-    xorg.libXdamage
-    xorg.libXext
-    xorg.libXfixes
-    xorg.libXi
-    xorg.libXrandr
-    xorg.libXrender
-    xorg.libXtst
-    xorg.libxcb
+    libx11
+    libxcomposite
+    libxdamage
+    libxext
+    libxfixes
+    libxi
+    libxrandr
+    libxrender
+    libxtst
+    libxcb
   ];
 
   sourceRoot = ".";
