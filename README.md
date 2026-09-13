@@ -17,7 +17,7 @@ Or add it to your system flake. Add this block under `inputs`:
 
 ```nix
 dawn-launcher = {
-  url = "github:<your-github-username>/dawn-launcher-flake";
+  url = "github:JustNeoNixy/dawn-launcher-flake";
   inputs.nixpkgs.follows = "nixpkgs";
 };
 ```
